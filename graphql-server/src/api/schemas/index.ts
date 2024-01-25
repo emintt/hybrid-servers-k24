@@ -7,5 +7,4 @@ const typeDefs = mergeTypeDefs(typesArray);
 
 export default typeDefs;
 
-
 // yhdistä tiedostoa

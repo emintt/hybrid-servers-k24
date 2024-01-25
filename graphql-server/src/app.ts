@@ -13,7 +13,6 @@ import {
   ApolloServerPluginLandingPageProductionDefault,
 } from '@apollo/server/plugin/landingPage/default';
 
-
 const app = express();
 
 (async () => {

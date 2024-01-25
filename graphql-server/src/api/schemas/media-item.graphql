@@ -2,7 +2,7 @@ type MediaItem {
   media_id: ID!
   user_id: ID!
   filename: String!
-  thumbnail: String!
+  thumbnail: String
   filesize: Int!
   media_type: String!
   title: String!
@@ -11,8 +11,38 @@ type MediaItem {
   tags: [Tag]
 }
 
+type MediaResponse {
+  message: String!
+  media: MediaItem!
+}
+
 type Query {
   mediaItems: [MediaItem]
   mediaItem(media_id: ID!): MediaItem
   mediaItemsByTag(tag: String!): [MediaItem]
+}
+
+input MediaItemInput {
+  user_id: ID!
+  title: String!
+  filename: String!
+  filesize: Int!
+  media_type: String!
+  description: String
+}
+
+input MediaItemUpdateInput {
+  title: String
+  description: String
+}
+
+input AddTagToMediaItemInput {
+  tag_name: String!
+  media_id: ID!
+}
+
+type Mutation {
+  createMediaItem(item: MediaItemInput!): MediaItem
+  addTagToMediaItem(input: AddTagToMediaItemInput!): MediaItem
+  updateMediaItem(input: MediaItemUpdateInput!, media_id: ID!): MediaItem
 }

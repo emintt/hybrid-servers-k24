@@ -1,7 +1,11 @@
+import {MediaItem} from '@sharedTypes/DBTypes';
 import {
   fetchAllMedia,
   fetchMediaById,
   fetchMediaByTag,
+  postMedia,
+  postTagToMedia,
+  putMedia,
 } from '../models/mediaModel';
 
 export default {
@@ -17,6 +21,33 @@ export default {
     mediaItemsByTag: async (_parent: undefined, args: {tag: string}) => {
       console.log('tag id is', args.tag);
       return await fetchMediaByTag(args.tag);
+    },
+  },
+  Mutation: {
+    createMediaItem: async (
+      _parent: undefined,
+      args: {item: Omit<MediaItem, 'media_id' | 'created_at' | 'thumbnail'>},
+    ) => {
+      return await postMedia(args.item);
+    },
+    addTagToMediaItem: async (
+      _parent: undefined,
+      args: {input: {media_id: string; tag_name: string}},
+    ) => {
+      console.log(args);
+      return await postTagToMedia(
+        args.input.tag_name,
+        Number(args.input.media_id),
+      );
+    },
+    updateMediaItem: async (
+      _parent: undefined,
+      args: {
+        input: Pick<MediaItem, 'title' | 'description'>;
+        media_id: string;
+      },
+    ) => {
+      return await putMedia(args.input, Number(args.media_id));
     },
   },
 };
