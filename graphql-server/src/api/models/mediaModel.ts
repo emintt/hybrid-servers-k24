@@ -89,7 +89,7 @@ const fetchMediaById = async (id: number): Promise<MediaItem | null> => {
   const uploadPath = process.env.UPLOAD_URL;
   try {
     // TODO: replace * with specific column names needed in this case
-    const sql = `SELECT *,
+    const sql = `SELECT user_id, filesize, media_type, title, description, created_at, media_id,
                 CONCAT(?, filename) AS filename,
                 CONCAT(?, CONCAT(filename, "-thumb.png")) AS thumbnail
                 FROM MediaItems
@@ -119,6 +119,7 @@ const fetchMediaById = async (id: number): Promise<MediaItem | null> => {
 const postMedia = async (
   media: Omit<MediaItem, 'media_id' | 'created_at' | 'thumbnail'>,
 ): Promise<MediaItem | null> => {
+  const uploadPath = process.env.UPLOAD_URL;
   const {user_id, filename, filesize, media_type, title, description} = media;
   const sql = `INSERT INTO MediaItems (user_id, filename, filesize, media_type, title, description)
                VALUES (?, ?, ?, ?, ?, ?)`;
@@ -126,9 +127,13 @@ const postMedia = async (
   try {
     const result = await promisePool.execute<ResultSetHeader>(sql, params);
     console.log('result', result);
+    const sql2 = `SELECT *,
+    CONCAT(?, filename) AS filename,
+    CONCAT(?, CONCAT(filename, "-thumb.png")) AS thumbnail FROM MediaItems WHERE media_id = ?`;
+    const params2 = [uploadPath, uploadPath, result[0].insertId];
     const [rows] = await promisePool.execute<RowDataPacket[] & MediaItem[]>(
-      'SELECT * FROM MediaItems WHERE media_id = ?',
-      [result[0].insertId],
+      sql2,
+      params2,
     );
     if (rows.length === 0) {
       return null;
