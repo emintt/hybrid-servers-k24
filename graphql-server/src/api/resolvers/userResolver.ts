@@ -44,11 +44,12 @@ export default {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(args),
       };
-      const user = await fetchData<LoginResponse>(
+      const loginResponse = await fetchData<LoginResponse>(
         process.env.AUTH_SERVER + '/auth/login',
         options,
       );
-      return user;
+      console.log('loginResponse', loginResponse);
+      return loginResponse;
     },
   },
 };
