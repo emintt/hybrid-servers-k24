@@ -1,10 +1,12 @@
-import {MediaItem} from '@sharedTypes/DBTypes';
+import { MediaItem, TokenContent } from '@sharedTypes/DBTypes';
 import {
+  deleteMedia,
   fetchAllMedia,
   fetchMediaById,
   fetchMediaByTag,
   postMedia,
   postTagToMedia,
+  putMedia,
 } from '../models/mediaModel';
 import { MyContext } from '../../local-types';
 import { GraphQLError } from 'graphql';
@@ -33,17 +35,19 @@ export default {
       context: MyContext,
     ) => {
       // call postMedia function from mediaModel.ts and return the result
-      // const userData = {
-      //   ...args.input,
-      //   user_id: context.user.user_id,
-      // };
+
       console.log('this is context from create media item', context);
       if (!context.user || !context.user.user_id) {
         throw new GraphQLError('Not authorized', {
           extensions: {code: 'NOT_AUTHORIZED'},
         });
       }
-      return postMedia(args.input);
+
+      const userData = {
+        ...args.input,
+        user_id: context.user.user_id,
+      };
+      return postMedia(userData);
     },
     addTagToMediaItem: async (
       _parent: undefined,
@@ -55,6 +59,31 @@ export default {
         Number(args.input.media_id),
       );
     },
+    deleteMediaItem: async (
+      _parent: undefined,
+      args: {media_id: string},
+      context: MyContext,
+    ) => {
+      console.log(context);
+      if (!context.user || !context.user.user_id) {
+        throw new GraphQLError('Not authorized', {
+          extensions: {code: 'NOT_AUTHORIZED'},
+        });
+      }
+      const user = {
+        user_id: context.user.user_id,
+        level_name: context.user.level_name,
+      };
+      return await deleteMedia(Number(args.media_id), user, context.user.token);
+    },
+    updateMediaItem: async (
+      _parent: undefined,
+      args: {
+        input: Pick<MediaItem, 'title' | 'description'>;
+        media_id: string;
+      },
+    ) => {
+      return await putMedia(args.input, Number(args.media_id));
+    },
   },
-
 };

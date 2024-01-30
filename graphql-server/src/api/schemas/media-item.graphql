@@ -26,6 +26,16 @@ input MediaItemInput {
   user_id: ID!
 }
 
+input MediaItemUpdateInput {
+  title: String
+  description: String
+}
+
+type MediaResponse {
+  message: String!
+  media: MediaItem!
+}
+
 input AddTagToMediaItemInput {
   media_id: ID!
   tag_name: String!
@@ -34,4 +44,6 @@ input AddTagToMediaItemInput {
 type Mutation {
   createMediaItem(input: MediaItemInput!): MediaItem
   addTagToMediaItem(input: AddTagToMediaItemInput!): MediaItem
+  deleteMediaItem(media_id: ID!): Message
+  updateMediaItem(input: MediaItemUpdateInput!, media_id: ID!): MediaResponse
 }

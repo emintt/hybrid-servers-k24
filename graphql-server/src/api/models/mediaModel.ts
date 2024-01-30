@@ -232,6 +232,7 @@ const deleteMedia = async (
     );
 
     if (result.affectedRows === 0) {
+      console.log(result);
       return {message: 'Media not deleted'};
     }
 

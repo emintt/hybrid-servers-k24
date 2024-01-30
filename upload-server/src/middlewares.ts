@@ -35,6 +35,7 @@ const authenticate = async (
   console.log('authenticate');
   try {
     const authHeader = req.headers.authorization;
+    console.log('authheader', authHeader);
     if (!authHeader) {
       next(new CustomError('Authentication failed', 401));
       return;

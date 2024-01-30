@@ -13,4 +13,5 @@ input TagInput {
 
 type Mutation {
   createTag(input: TagInput!): Tag
+  deleteTag(input: ID!): Message
 }

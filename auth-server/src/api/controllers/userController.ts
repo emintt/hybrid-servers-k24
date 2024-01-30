@@ -252,6 +252,7 @@ const checkToken = async (
   next: NextFunction
 ) => {
   const userFromToken = res.locals.user;
+  console.log('reslocal', res.locals);
   // check if user exists in database
   const user = await getUserById(userFromToken.user_id);
   if (!user) {

@@ -1,4 +1,4 @@
-import {User, UserWithNoPassword} from '@sharedTypes/DBTypes';
+import {TokenContent, User, UserWithNoPassword} from '@sharedTypes/DBTypes';
 import {fetchData} from '../../lib/functions';
 import {LoginResponse, UserResponse} from '@sharedTypes/MessageTypes';
 
@@ -15,6 +15,12 @@ export default {
         process.env.AUTH_SERVER + '/users/' + args.user_id,
       );
       return user;
+    },
+    checkToken: async () => {
+      const userResponse = await fetch(
+        process.env.AUTH_SERVER + '/users/token',
+      );
+      return userResponse;
     },
   },
   Mutation: {
@@ -44,11 +50,12 @@ export default {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(args),
       };
-      const user = await fetchData<LoginResponse>(
+      const loginResponse = await fetchData<LoginResponse>(
         process.env.AUTH_SERVER + '/auth/login',
         options,
       );
-      return user;
+      console.log('loginResponse', loginResponse);
+      return loginResponse;
     },
   },
 };
