@@ -50,6 +50,14 @@ export default function RootLayout({
               Upload
             </a>
           </li>
+          <li className="mr-4">
+            <a
+              href="/login"
+              className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white"
+            >
+              Login
+            </a>
+          </li>
         </ul>
       </div>
     </nav>
