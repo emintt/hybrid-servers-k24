@@ -27,6 +27,14 @@ type UserDeleteResponse = MessageResponse & {
   user: { user_id: number };
 };
 
+type AvailableResponse = Partial<MessageResponse> & {
+  available?: boolean;
+};
+
+type BooleanResponse = MessageResponse & {
+  success: boolean;
+};
+
 // for upload server
 type UploadResponse = MessageResponse & {
   data: {
@@ -44,4 +52,6 @@ export type {
   UploadResponse,
   UserResponse,
   UserDeleteResponse,
+  AvailableResponse,
+  BooleanResponse,
 };

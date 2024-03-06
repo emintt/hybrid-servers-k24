@@ -1,117 +1,57 @@
-type UserLevel = {
-  level_id: number;
-  level_name: 'Admin' | 'User' | 'Guest';
-};
+import { MediaItem, UserWithNoPassword } from './DBTypes';
 
-type User = {
-  user_id: number;
-  username: string;
-  password: string;
-  email: string;
-  user_level_id: number;
-  created_at: Date | string;
-};
-
-type MediaItem = {
-  media_id: number;
-  user_id: number;
-  filename: string;
-  thumbnail: string;
-  filesize: number;
-  media_type: string;
-  title: string;
-  description: string | null;
-  created_at: Date | string;
-  app_id: string;
-};
-
-type Comment = {
-  comment_id: number;
-  media_id: number;
-  user_id: number;
-  comment_text: string;
-  created_at: Date;
-};
-
-type Like = {
-  like_id: number;
-  media_id: number;
-  user_id: number;
-  created_at: Date;
-};
-
-type Rating = {
-  rating_id: number;
-  media_id: number;
-  user_id: number;
-  rating_value: number;
-  created_at: Date;
-};
-
-type Tag = {
-  tag_id: number;
-  tag_name: string;
-};
-
-type MediaItemTag = {
-  media_id: number;
-  tag_id: number;
-};
-
-type TagResult = MediaItemTag & Tag;
-
-type UploadResult = {
+type MessageResponse = {
   message: string;
-  data?: {
-    image: string;
-  };
 };
 
-type MostLikedMedia = Pick<
-  MediaItem,
-  | 'media_id'
-  | 'filename'
-  | 'filesize'
-  | 'media_type'
-  | 'title'
-  | 'description'
-  | 'created_at'
-> &
-  Pick<User, 'user_id' | 'username' | 'email' | 'created_at'> & {
-    likes_count: bigint;
-  };
+type ErrorResponse = MessageResponse & {
+  stack?: string;
+};
 
-// type gymnastics to get rid of user_level_id from User type and replace it with level_name from UserLevel type
-type UserWithLevel = Omit<User, 'user_level_id'> &
-  Pick<UserLevel, 'level_name'>;
+type MediaResponse = MessageResponse & {
+  media: MediaItem | MediaItem[];
+};
 
-type UserWithNoPassword = Omit<UserWithLevel, 'password'>;
+// for auth server
+type LoginResponse = MessageResponse & {
+  token: string;
+  message: string;
+  user: UserWithNoPassword;
+};
 
-type TokenContent = Pick<User, 'user_id'> & Pick<UserLevel, 'level_name'>;
+type UserResponse = MessageResponse & {
+  user: UserWithNoPassword;
+};
 
-type MediaItemWithOwner = MediaItem & Pick<User, 'username'>;
+type UserDeleteResponse = MessageResponse & {
+  user: { user_id: number };
+};
+
+type AvailableResponse = Partial<MessageResponse> & {
+  available?: boolean;
+};
+
+type BooleanResponse = MessageResponse & {
+  success: boolean;
+};
 
 // for upload server
-type FileInfo = {
-  filename: string;
-  user_id: number;
+type UploadResponse = MessageResponse & {
+  data: {
+    filename: string;
+    media_type: string;
+    filesize: number;
+  };
 };
 
 export type {
-  UserLevel,
-  User,
-  MediaItem,
-  Comment,
-  Like,
-  Rating,
-  Tag,
-  MediaItemTag,
-  TagResult,
-  UploadResult,
-  MostLikedMedia,
-  UserWithLevel,
-  UserWithNoPassword,
-  TokenContent,
-  MediaItemWithOwner,
-  FileInfo,
+  MessageResponse,
+  ErrorResponse,
+  MediaResponse,
+  LoginResponse,
+  UploadResponse,
+  UserResponse,
+  UserDeleteResponse,
+  AvailableResponse,
+  BooleanResponse,
 };
