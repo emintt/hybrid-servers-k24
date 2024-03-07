@@ -1,35 +1,42 @@
-// import { SignJWT, jwtVerify } from "jose";
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { getUserByUsername } from "@/models/userModel";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { TokenContent } from '@sharedTypes/DBTypes';
+import { redirect } from 'next/navigation';
 
 const secretKey = "secret";
 const key = new TextEncoder().encode(secretKey);
 
-export async function encrypt(payload: any) {
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("10 sec from now")
-    .sign(key);
-}
-
-export async function decrypt(input: string): Promise<any> {
-  const { payload } = await jwtVerify(input, key, {
-    algorithms: ["HS256"],
-  });
-  return payload;
-}
-
 export async function login(formData: FormData) {
   // Verify credentials && get the user
 
-  const user = { email: formData.get("email"), name: "John" };
+  const user = await getUserByUsername(formData.get('username') as string);
+  if (!user) {
+    throw new Error('Incorrect username/password');
+  }
 
-  // Create the session
-  const expires = new Date(Date.now() + 10 * 1000);
-  const session = await encrypt({ user, expires });
+  if (user.password && !bcrypt.compareSync(formData.get('password') as string, user.password)) {
+    throw new Error('Incorrect username/password');
+  }
 
-  // Save the session in a cookie
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT secret not set');
+  }
+  // Create the session object
+  const tokenContent: TokenContent = {
+    user_id: user.user_id,
+    level_name: user.level_name,
+  };
+  // 7 päivää 
+  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);   
+  // expiresIn: '7d' vapaaehtoinen
+  const session = jwt.sign(tokenContent, process.env.JWT_SECRET, {
+    expiresIn: '7d',
+  });
+
+  // Save the session object in a cookie
   cookies().set("session", session, { expires, httpOnly: true });
 }
 
@@ -38,10 +45,10 @@ export async function logout() {
   cookies().set("session", "", { expires: new Date(0) });
 }
 
-export async function getSession() {
+export function getSession():TokenContent | null {
   const session = cookies().get("session")?.value;
   if (!session) return null;
-  return await decrypt(session);
+  return jwt.verify(session, process.env.JWT_SECRET as string) as TokenContent;
 }
 
 export async function updateSession(request: NextRequest) {
@@ -49,14 +56,22 @@ export async function updateSession(request: NextRequest) {
   if (!session) return;
 
   // Refresh the session so it doesn't expire
-  const parsed = await decrypt(session);
-  parsed.expires = new Date(Date.now() + 10 * 1000);
+  const parsed = jwt.verify(session, process.env.JWT_SECRET as string);
   const res = NextResponse.next();
+  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);   
+  // tehdään uus tokeni
   res.cookies.set({
     name: "session",
-    value: await encrypt(parsed),
+    value: jwt.sign(parsed, process.env.JWT_SECRET as string),
     httpOnly: true,
-    expires: parsed.expires,
+    expires: expires,
   });
   return res;
 }
+
+export function requireAuth() {
+    const session = getSession();
+    if (!session?.user_id) {
+      redirect('/');
+    }
+  }

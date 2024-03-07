@@ -4,6 +4,7 @@ import { getSession, login, logout } from '@/lib/authActions';
 export default async function Page() {
   // const session = await getSession();
 
+  // nextissä voidaan käyttää suoraan async
   const loginHandler = async (formData: FormData) => {
     'use server';
     await login(formData);
